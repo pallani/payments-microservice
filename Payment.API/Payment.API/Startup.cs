@@ -1,7 +1,6 @@
 using System;
 using MediatR;
 using System.Reflection;
-using System.Data.Common;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -78,31 +77,17 @@ namespace Payment.API
 
     public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-      if (configuration.GetValue<bool>("EnablePostgres") == true)
-      {
-        services.AddDbContext<PaymentContext>(options =>
-        {
-          options.UseNpgsql(configuration["ConnectionStringPostgres"],
-						npgsqlOptionsAction: npsqloptions => {
-							npsqloptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
-							npsqloptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
-						}
-          );
-        });
-
-				return services;
-      }
-
       services.AddDbContext<PaymentContext>(options =>
       {
-        options.UseSqlServer(configuration["ConnectionString"],
-					sqlServerOptionsAction: sqlOptions => {
-						sqlOptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
-						sqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
-					});
+        options.UseNpgsql(configuration["ConnectionString"],
+					npgsqlOptionsAction: npsqloptions => {
+						npsqloptions.MigrationsAssembly(typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
+						npsqloptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
+					}
+        );
       });
 
-      return services;
+			return services;
     }
   }
 }
